@@ -106,5 +106,5 @@ def lexer(filepath):
 # print('valid test 5:', lexer('lexer_tests/valid/tabs.c'))
 
 # custom tests
-print('custom invalid test 6:', lexer(
-    'lexer_tests/invalid_lex/custom_invalid_lex_tests.c'))
+# print('custom invalid test 6:', lexer(
+#     'lexer_tests/invalid_lex/custom_invalid_lex_tests.c'))
