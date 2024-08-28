@@ -5,11 +5,10 @@ symbols = ['{', '}', '[', ']', '(', ')', ';']
 # special case: \n, which we should ignore
 
 
-def lexer(filepath):
-    r = open(filepath, 'r')
-    program = r.read()
+def lexer(program):
     if not program:
-        return 'Lexer error: Read error.'
+        print('Lexer error: No argument.')
+        return
     tokens = []
     i = 0
     program = program.strip()
@@ -50,12 +49,13 @@ def lexer(filepath):
                 continue
             # invalid char. throw error
             if not program[i].isalnum() and program[i] != '_' and program[i] not in symbols:
-                return 'Lexer error: Char invalid.'
-
+                print('Lexer error: Char invalid.')
+                return
             if program[i].isalpha() or program[i] == '_':
                 if constant:
                     # constant is cached. 123main is invalid. throw error
-                    return 'Lexer error: Invalid name.'
+                    print('Lexer error: Invalid name.')
+                    return
                 token += program[i]
             elif program[i].isnumeric():
                 constant += program[i]
@@ -91,20 +91,4 @@ def lexer(filepath):
             i += 1
 
 
-# these should return a lexer error
-# print('invalid test 1:', lexer('lexer_tests/invalid_lex/at_sign.c'))
-# print('invalid test 2:', lexer('lexer_tests/invalid_lex/backslash.c'))
-# print('invalid test 3:', lexer('lexer_tests/invalid_lex/backtick.c'))
-# print('invalid test 4:', lexer('lexer_tests/invalid_lex/invalid_identifier.c'))
-# print('invalid test 5:', lexer('lexer_tests/invalid_lex/invalid_identifier_2.c'))
 
-# # these should return list of tokens
-# print('valid test 1:', lexer('lexer_tests/valid/multi_digit.c'))
-# print('valid test 2:', lexer('lexer_tests/valid/no_newlines.c'))
-# print('valid test 3:', lexer('lexer_tests/valid/return_0.c'))
-# print('valid test 4:', lexer('lexer_tests/valid/spaces.c'))
-# print('valid test 5:', lexer('lexer_tests/valid/tabs.c'))
-
-# custom tests
-# print('custom invalid test 6:', lexer(
-#     'lexer_tests/invalid_lex/custom_invalid_lex_tests.c'))
