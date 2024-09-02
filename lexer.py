@@ -1,15 +1,23 @@
-# keywords = ['int', 'void', 'return']
+keywords = ['int', 'void', 'return']
 symbols = ['{', '}', '[', ']', '(', ')', ';']
 
 # breakpoints: white space, symbols, changes from str to int or vice versa
 # special case: \n, which we should ignore
 
+tokenTypes = {
+    'keyword': 'KEYWORD',
+    'symbol': 'SYMBOL',
+    'identifier': 'IDENTIFIER',  # non-keyword string
+    'integer': 'INTEGER',
+    'float': 'FLOAT',
+    'operator': 'OPERATOR'
+}
+
 
 def lexer(program):
     if not program:
-        print('Lexer error: No argument.')
         return
-    tokens = []
+    tokens = []  # return an array of Token objects
     i = 0
     program = program.strip()
     while program:
@@ -30,20 +38,26 @@ def lexer(program):
             # will have to come back to address '\n' and '\t' in string literals at some point
             if program[i] == '\n' or program[i] == '\t':
                 if constant:
-                    tokens.append(int(constant))
+                    tokens.append([tokenTypes['integer'], int(constant)])
                     constant = ''
                 elif token:
-                    tokens.append(token)
+                    if token in keywords:
+                        tokens.append([tokenTypes['keyword'], token])
+                    else:
+                        tokens.append([tokenTypes['identifier'], token])
                     token = ''
                 i += 1
                 continue
             # break on space. append cached constant/token
             if program[i] == ' ':
                 if constant:
-                    tokens.append(int(constant))
+                    tokens.append([tokenTypes['integer'], int(constant)])
                     constant = ''
                 elif token:
-                    tokens.append(token)
+                    if token in keywords:
+                        tokens.append([tokenTypes['keyword'], token])
+                    else:
+                        tokens.append([tokenTypes['identifier'], token])
                     token = ''
                 i += 1
                 continue
@@ -64,31 +78,39 @@ def lexer(program):
                 # actually, do we want to throw error or just push number to tokens?
                 if constant:
                     # append cached constant
-                    tokens.append(int(constant))
+                    tokens.append([tokenTypes['integer'], int(constant)])
                     constant = ''
                 # push token and symbol separately. clear token
                 elif token:
-                    tokens.append(token)
+                    if token in keywords:
+                        tokens.append([tokenTypes['keyword'], token])
+                    else:
+                        tokens.append([tokenTypes['identifier'], token])
                     token = ''
-                tokens.append(program[i])
+                tokens.append([tokenTypes['symbol'], program[i]])
             # we want to break on white space, although this is not
             # the only place to break!
             elif program[i] == ' ':
                 if token:
-                    tokens.append(token)
+                    if token in keywords:
+                        tokens.append([tokenTypes['keyword'], token])
+                    else:
+                        tokens.append([tokenTypes['identifier'], token])
                     token = ''
                 elif constant:
-                    tokens.append(int(constant))
+                    tokens.append([tokenTypes['integer'], int(constant)])
                     constant = ''
 
             # at end of input
             if i >= len(program)-1:
                 if token:
-                    tokens.append(token)
+                    if token in keywords:
+                        tokens.append([tokenTypes['keyword'], token])
+                    else:
+                        tokens.append([tokenTypes['identifier'], token])
+                    token = ''
                 elif constant:
-                    tokens.append(int(constant))
+                    tokens.append([tokenTypes['integer'], int(constant)])
+                    constant = ''
                 return tokens
             i += 1
-
-
-

@@ -1,5 +1,5 @@
 from lexer import lexer
-# from parser import parser
+from parser import parser
 
 
 def driver(filepath):
@@ -13,6 +13,7 @@ def driver(filepath):
     tokens = lexer(program)
     if not tokens:
         return 'Driver error: Lexer error.'
+    return tokens
 
     # parse tokens
     # parsed = parser(tokens)
@@ -31,11 +32,11 @@ def driver(filepath):
 #     'tests/lexer_tests/invalid_lex/invalid_identifier_2.c'))
 
 # # these should return list of tokens
-# print('valid test 1:', driver('tests/lexer_tests/valid/multi_digit.c'))
-# print('valid test 2:', driver('tests/lexer_tests/valid/no_newlines.c'))
-# print('valid test 3:', driver('tests/lexer_tests/valid/return_0.c'))
-# print('valid test 4:', driver('tests/lexer_tests/valid/spaces.c'))
-# print('valid test 5:', driver('tests/lexer_tests/valid/tabs.c'))
+print('valid test 1:', driver('tests/lexer_tests/valid/multi_digit.c'))
+print('valid test 2:', driver('tests/lexer_tests/valid/no_newlines.c'))
+print('valid test 3:', driver('tests/lexer_tests/valid/return_0.c'))
+print('valid test 4:', driver('tests/lexer_tests/valid/spaces.c'))
+print('valid test 5:', driver('tests/lexer_tests/valid/tabs.c'))
 
 # custom tests
 # print('custom invalid test 6:', driver(
