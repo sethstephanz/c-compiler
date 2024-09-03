@@ -2,7 +2,7 @@ keywords = ['int', 'void', 'return']
 symbols = ['{', '}', '[', ']', '(', ')', ';']
 
 # breakpoints: white space, symbols, changes from str to int or vice versa
-# special case: \n, which we should ignore
+# special case: \n and \t, which we should treat as spaces unless they're in string literals (tbd)
 
 tokenTypes = {
     'keyword': 'KEYWORD',
@@ -21,9 +21,7 @@ def lexer(program):
     i = 0
     program = program.strip()
     while program:
-        # break on white space, symbols, and changes from str to int or vice versa
-        # there's no reason that a constant and a token should be cached at same time while tokenizing
-
+        # constant and token should not be cached at same time
         # string version of constant (to be converted to int)
         constant = ''
         # token (to be kept as string)
@@ -37,33 +35,19 @@ def lexer(program):
             # ignore all newlines and tabs for now.
             # will have to come back to address '\n' and '\t' in string literals at some point
             if program[i] == '\n' or program[i] == '\t':
-                if constant:
-                    tokens.append([tokenTypes['integer'], int(constant)])
-                    constant = ''
-                elif token:
-                    if token in keywords:
-                        tokens.append([tokenTypes['keyword'], token])
-                    else:
-                        tokens.append([tokenTypes['identifier'], token])
-                    token = ''
+                tokens = appendToken(tokens, constant, token)
+                token = constant = ''
                 i += 1
                 continue
             # break on space. append cached constant/token
             if program[i] == ' ':
-                if constant:
-                    tokens.append([tokenTypes['integer'], int(constant)])
-                    constant = ''
-                elif token:
-                    if token in keywords:
-                        tokens.append([tokenTypes['keyword'], token])
-                    else:
-                        tokens.append([tokenTypes['identifier'], token])
-                    token = ''
+                tokens = appendToken(tokens, constant, token)
+                token = constant = ''
                 i += 1
                 continue
             # invalid char. throw error
             if not program[i].isalnum() and program[i] != '_' and program[i] not in symbols:
-                print('Lexer error: Char invalid.')
+                print('Lexer error: Invalid char.')
                 return
             if program[i].isalpha() or program[i] == '_':
                 if constant:
@@ -74,43 +58,29 @@ def lexer(program):
             elif program[i].isnumeric():
                 constant += program[i]
             elif program[i] in symbols:
-                # 123() not allowed. throw error
-                # actually, do we want to throw error or just push number to tokens?
-                if constant:
-                    # append cached constant
-                    tokens.append([tokenTypes['integer'], int(constant)])
-                    constant = ''
-                # push token and symbol separately. clear token
-                elif token:
-                    if token in keywords:
-                        tokens.append([tokenTypes['keyword'], token])
-                    else:
-                        tokens.append([tokenTypes['identifier'], token])
-                    token = ''
+                tokens = appendToken(tokens, constant, token)
+                token = constant = ''
                 tokens.append([tokenTypes['symbol'], program[i]])
             # we want to break on white space, although this is not
             # the only place to break!
             elif program[i] == ' ':
-                if token:
-                    if token in keywords:
-                        tokens.append([tokenTypes['keyword'], token])
-                    else:
-                        tokens.append([tokenTypes['identifier'], token])
-                    token = ''
-                elif constant:
-                    tokens.append([tokenTypes['integer'], int(constant)])
-                    constant = ''
+                tokens = appendToken(tokens, constant, token)
+                token = constant = ''
 
             # at end of input
             if i >= len(program)-1:
-                if token:
-                    if token in keywords:
-                        tokens.append([tokenTypes['keyword'], token])
-                    else:
-                        tokens.append([tokenTypes['identifier'], token])
-                    token = ''
-                elif constant:
-                    tokens.append([tokenTypes['integer'], int(constant)])
-                    constant = ''
+                tokens = appendToken(tokens, constant, token)
+                token = constant = ''
                 return tokens
             i += 1
+
+
+def appendToken(tokens, constant, token):
+    if constant:
+        tokens.append([tokenTypes['integer'], int(constant)])
+    elif token:
+        if token in keywords:
+            tokens.append([tokenTypes['keyword'], token])
+        else:
+            tokens.append([tokenTypes['identifier'], token])
+    return tokens
