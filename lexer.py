@@ -35,13 +35,17 @@ def lexer(program):
             # ignore all newlines and tabs for now.
             # will have to come back to address '\n' and '\t' in string literals at some point
             if program[i] == '\n' or program[i] == '\t':
-                tokens = appendToken(tokens, constant, token)
+                newToken = createNewToken(constant, token)
+                if newToken:
+                    tokens.append(newToken)
                 token = constant = ''
                 i += 1
                 continue
             # break on space. append cached constant/token
             if program[i] == ' ':
-                tokens = appendToken(tokens, constant, token)
+                newToken = createNewToken(constant, token)
+                if newToken:
+                    tokens.append(newToken)
                 token = constant = ''
                 i += 1
                 continue
@@ -58,29 +62,36 @@ def lexer(program):
             elif program[i].isnumeric():
                 constant += program[i]
             elif program[i] in symbols:
-                tokens = appendToken(tokens, constant, token)
+                newToken = createNewToken(constant, token)
+                if newToken:
+                    tokens.append(newToken)
                 token = constant = ''
                 tokens.append([tokenTypes['symbol'], program[i]])
             # we want to break on white space, although this is not
             # the only place to break!
             elif program[i] == ' ':
-                tokens = appendToken(tokens, constant, token)
+                newToken = createNewToken(constant, token)
+                if newToken:
+                    tokens.append(newToken)
                 token = constant = ''
 
             # at end of input
             if i >= len(program)-1:
-                tokens = appendToken(tokens, constant, token)
+                newToken = createNewToken(constant, token)
+                if newToken:
+                    tokens.append(newToken)
                 token = constant = ''
                 return tokens
             i += 1
 
 
-def appendToken(tokens, constant, token):
+def createNewToken(constant, token):
+    newToken = None
     if constant:
-        tokens.append([tokenTypes['integer'], int(constant)])
+        newToken = [tokenTypes['integer'], int(constant)]
     elif token:
         if token in keywords:
-            tokens.append([tokenTypes['keyword'], token])
+            newToken = [tokenTypes['keyword'], token]
         else:
-            tokens.append([tokenTypes['identifier'], token])
-    return tokens
+            newToken = [tokenTypes['identifier'], token]
+    return newToken
